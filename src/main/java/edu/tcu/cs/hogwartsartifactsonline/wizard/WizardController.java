@@ -4,9 +4,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import edu.tcu.cs.hogwartsartifactsonline.wizard.Wizard;
-import edu.tcu.cs.hogwartsartifactsonline.wizard.WizardService;
-
 import java.util.List;
 import java.util.Optional;
 
