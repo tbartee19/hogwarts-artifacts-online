@@ -1,6 +1,7 @@
 package edu.tcu.cs.hogwartsartifactsonline.wizard;
 
 import edu.tcu.cs.hogwartsartifactsonline.artifact.Artifact;
+import edu.tcu.cs.hogwartsartifactsonline.wizard.dto.WizardDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -28,6 +29,7 @@ class WizardServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
+        // Artifacts setup
         Artifact a1 = new Artifact();
         a1.setId("1");
         a1.setName("Deluminator");
@@ -36,6 +38,7 @@ class WizardServiceTest {
         a2.setId("2");
         a2.setName("Invisibility Cloak");
 
+        // Wizards setup
         w1 = new Wizard();
         w1.setId(1);
         w1.setName("Albus Dumbledore");
@@ -71,6 +74,14 @@ class WizardServiceTest {
     }
 
     @Test
+    void testFindById_NotFound() {
+        when(wizardRepository.findById(4)).thenReturn(Optional.empty());
+
+        Optional<Wizard> result = wizardService.findById(4);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
     void testSave() {
         when(wizardRepository.save(any(Wizard.class))).thenReturn(w1);
 
@@ -83,13 +94,21 @@ class WizardServiceTest {
         when(wizardRepository.findById(1)).thenReturn(Optional.of(w1));
         when(wizardRepository.save(any(Wizard.class))).thenReturn(w1);
 
-        Wizard updatedWizard = new Wizard();
-        updatedWizard.setId(1);
-        updatedWizard.setName("Albus Dumbledore - Updated");
+        WizardDto updatedWizardDto = new WizardDto(1, "Albus Dumbledore - Updated", 2);
 
-        Optional<Wizard> result = wizardService.update(1, updatedWizard);
+        Optional<Wizard> result = wizardService.update(1, updatedWizardDto);
         assertTrue(result.isPresent());
         assertEquals("Albus Dumbledore - Updated", result.get().getName());
+    }
+
+    @Test
+    void testUpdate_NotFound() {
+        when(wizardRepository.findById(4)).thenReturn(Optional.empty());
+
+        WizardDto nonExistentWizardDto = new WizardDto(4, "Unknown Wizard", 0);
+
+        Optional<Wizard> result = wizardService.update(4, nonExistentWizardDto);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -100,5 +119,14 @@ class WizardServiceTest {
         boolean result = wizardService.delete(1);
         assertTrue(result);
         verify(wizardRepository, times(1)).deleteById(1);
+    }
+
+    @Test
+    void testDelete_NotFound() {
+        when(wizardRepository.existsById(4)).thenReturn(false);
+
+        boolean result = wizardService.delete(4);
+        assertFalse(result);
+        verify(wizardRepository, never()).deleteById(4);
     }
 }

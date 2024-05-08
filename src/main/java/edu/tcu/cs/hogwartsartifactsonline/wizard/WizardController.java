@@ -4,12 +4,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import edu.tcu.cs.hogwartsartifactsonline.wizard.converter.WizardToWizardDtoConverter;
+import edu.tcu.cs.hogwartsartifactsonline.wizard.dto.WizardDto;
+
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/wizards")
 public class WizardController {
+    
     private final WizardService wizardService;
 
     public WizardController(WizardService wizardService) {
@@ -34,9 +38,12 @@ public class WizardController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Wizard> update(@PathVariable Integer id, @RequestBody Wizard wizard) {
-        Optional<Wizard> updatedWizard = wizardService.update(id, wizard);
-        return updatedWizard.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<WizardDto> update(@PathVariable Integer id, @RequestBody WizardDto wizardDto) {
+        Optional<Wizard> updatedWizard = wizardService.update(id, wizardDto);
+
+        
+        return updatedWizard.map(w -> ResponseEntity.ok(new WizardDto(w.getId(), w.getName(), w.getNumberOfArtifacts())))
+                            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
