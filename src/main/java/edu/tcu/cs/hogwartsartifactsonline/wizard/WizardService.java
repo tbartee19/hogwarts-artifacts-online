@@ -1,6 +1,9 @@
 package edu.tcu.cs.hogwartsartifactsonline.wizard;
 
 import org.springframework.stereotype.Service;
+
+import edu.tcu.cs.hogwartsartifactsonline.wizard.dto.WizardDto;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -24,10 +27,10 @@ public class WizardService {
         return wizardRepository.save(wizard);
     }
 
-    public Optional<Wizard> update(Integer id, Wizard updatedWizard) {
+    public Optional<Wizard> update(Integer id, WizardDto wizardDto) {
         return wizardRepository.findById(id).map(existingWizard -> {
-            existingWizard.setName(updatedWizard.getName());
-            existingWizard.setArtifacts(updatedWizard.getArtifacts());
+            existingWizard.setName(wizardDto.name());
+
             return wizardRepository.save(existingWizard);
         });
     }

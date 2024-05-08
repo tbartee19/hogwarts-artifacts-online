@@ -1,5 +1,8 @@
 package edu.tcu.cs.hogwartsartifactsonline.wizard;
 
+import edu.tcu.cs.hogwartsartifactsonline.wizard.Wizard;
+import edu.tcu.cs.hogwartsartifactsonline.wizard.WizardService;
+import edu.tcu.cs.hogwartsartifactsonline.wizard.dto.WizardDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +62,14 @@ class WizardControllerTest {
     }
 
     @Test
+    void testFindById_NotFound() throws Exception {
+        when(wizardService.findById(4)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/wizards/4"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void testAdd() throws Exception {
         Wizard w1 = new Wizard();
         w1.setId(1);
@@ -75,17 +86,31 @@ class WizardControllerTest {
 
     @Test
     void testUpdate() throws Exception {
+        WizardDto wizardDto = new WizardDto(1, "Albus Dumbledore - Updated", 2);
+
         Wizard w1 = new Wizard();
         w1.setId(1);
-        w1.setName("Albus Dumbledore");
+        w1.setName("Albus Dumbledore - Updated");
 
-        when(wizardService.update(eq(1), any(Wizard.class))).thenReturn(Optional.of(w1));
+        when(wizardService.update(eq(1), any(WizardDto.class))).thenReturn(Optional.of(w1));
 
         mockMvc.perform(put("/api/wizards/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(w1)))
+                .content(objectMapper.writeValueAsString(wizardDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Albus Dumbledore"));
+                .andExpect(jsonPath("$.name").value("Albus Dumbledore - Updated"));
+    }
+
+    @Test
+    void testUpdate_NotFound() throws Exception {
+        WizardDto wizardDto = new WizardDto(4, "Unknown Wizard", 0);
+
+        when(wizardService.update(eq(4), any(WizardDto.class))).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/api/wizards/4")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(wizardDto)))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -94,5 +119,13 @@ class WizardControllerTest {
 
         mockMvc.perform(delete("/api/wizards/1"))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void testDelete_NotFound() throws Exception {
+        when(wizardService.delete(4)).thenReturn(false);
+
+        mockMvc.perform(delete("/api/wizards/4"))
+                .andExpect(status().isNotFound());
     }
 }
