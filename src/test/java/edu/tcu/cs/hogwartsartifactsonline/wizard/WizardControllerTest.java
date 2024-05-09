@@ -1,5 +1,6 @@
 package edu.tcu.cs.hogwartsartifactsonline.wizard;
 
+import edu.tcu.cs.hogwartsartifactsonline.system.StatusCode;
 import edu.tcu.cs.hogwartsartifactsonline.system.exception.ObjectNotFoundException;
 import edu.tcu.cs.hogwartsartifactsonline.wizard.Wizard;
 import edu.tcu.cs.hogwartsartifactsonline.wizard.WizardService;
@@ -136,5 +137,16 @@ class WizardControllerTest {
 
         mockMvc.perform(delete(this.baseUrl + "/wizards/4"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testAssignArtifactSuccess() throws Exception {
+        doNothing().when(this.wizardService).assignArtifact(2, "1250808601744904191");
+
+        this.mockMvc.perform(put(this.baseUrl + "/wizards/2/artifacts/1250808601744904191").accept(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.flag").value(true))
+            .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+            .andExpect(jsonPath("$.message").value("Artifact Assignment Success"))
+            .andExpect(jsonPath("$.data").isEmpty());
     }
 }

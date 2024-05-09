@@ -4,6 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import edu.tcu.cs.hogwartsartifactsonline.system.Result;
+import edu.tcu.cs.hogwartsartifactsonline.system.StatusCode;
 import edu.tcu.cs.hogwartsartifactsonline.system.exception.ObjectNotFoundException;
 
 import edu.tcu.cs.hogwartsartifactsonline.wizard.dto.WizardDto;
@@ -58,4 +60,12 @@ public class WizardController {
         boolean deleted = wizardService.delete(id);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
+
+    @PutMapping("/{id}/artifacts/{artifactId}")
+    public Result assignArtifact(@PathVariable Integer id, @PathVariable String artifactId) {
+        this.wizardService.assignArtifact(id, artifactId);
+        return new Result(true, StatusCode.SUCCESS,"Artifact Assignment Success");
+    }
+
+
 }
