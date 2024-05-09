@@ -1,7 +1,11 @@
 package edu.tcu.cs.hogwartsartifactsonline.wizard;
 
-import edu.tcu.cs.hogwartsartifactsonline.artifact.Artifact;
+import edu.tcu.cs.hogwartsartifactsonline.wizard.WizardService;
+import edu.tcu.cs.hogwartsartifactsonline.wizard.Wizard;
+import edu.tcu.cs.hogwartsartifactsonline.wizard.WizardRepository;
 import edu.tcu.cs.hogwartsartifactsonline.wizard.dto.WizardDto;
+import edu.tcu.cs.hogwartsartifactsonline.artifact.Artifact;
+import edu.tcu.cs.hogwartsartifactsonline.system.exception.ObjectNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -14,6 +18,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 
 class WizardServiceTest {
 
@@ -68,17 +73,15 @@ class WizardServiceTest {
     void testFindById() {
         when(wizardRepository.findById(1)).thenReturn(Optional.of(w1));
 
-        Optional<Wizard> result = wizardService.findById(1);
-        assertTrue(result.isPresent());
-        assertEquals("Albus Dumbledore", result.get().getName());
+        Wizard result = wizardService.findById(1);
+        assertEquals("Albus Dumbledore", result.getName());
     }
 
     @Test
     void testFindById_NotFound() {
         when(wizardRepository.findById(4)).thenReturn(Optional.empty());
 
-        Optional<Wizard> result = wizardService.findById(4);
-        assertTrue(result.isEmpty());
+        assertThrows(ObjectNotFoundException.class, () -> wizardService.findById(4));
     }
 
     @Test
@@ -96,9 +99,8 @@ class WizardServiceTest {
 
         WizardDto updatedWizardDto = new WizardDto(1, "Albus Dumbledore - Updated", 2);
 
-        Optional<Wizard> result = wizardService.update(1, updatedWizardDto);
-        assertTrue(result.isPresent());
-        assertEquals("Albus Dumbledore - Updated", result.get().getName());
+        Wizard result = wizardService.update(1, updatedWizardDto);
+        assertEquals("Albus Dumbledore - Updated", result.getName());
     }
 
     @Test
@@ -107,13 +109,12 @@ class WizardServiceTest {
 
         WizardDto nonExistentWizardDto = new WizardDto(4, "Unknown Wizard", 0);
 
-        Optional<Wizard> result = wizardService.update(4, nonExistentWizardDto);
-        assertTrue(result.isEmpty());
+        assertThrows(ObjectNotFoundException.class, () -> wizardService.update(4, nonExistentWizardDto));
     }
 
     @Test
     void testDelete() {
-        when(wizardRepository.existsById(1)).thenReturn(true);
+        when(wizardRepository.findById(1)).thenReturn(Optional.of(w1));
         doNothing().when(wizardRepository).deleteById(1);
 
         boolean result = wizardService.delete(1);
@@ -123,10 +124,9 @@ class WizardServiceTest {
 
     @Test
     void testDelete_NotFound() {
-        when(wizardRepository.existsById(4)).thenReturn(false);
+        when(wizardRepository.findById(4)).thenReturn(Optional.empty());
 
-        boolean result = wizardService.delete(4);
-        assertFalse(result);
+        assertThrows(ObjectNotFoundException.class, () -> wizardService.delete(4));
         verify(wizardRepository, never()).deleteById(4);
     }
 }

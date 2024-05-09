@@ -2,10 +2,10 @@ package edu.tcu.cs.hogwartsartifactsonline.wizard;
 
 import org.springframework.stereotype.Service;
 
+import edu.tcu.cs.hogwartsartifactsonline.system.exception.ObjectNotFoundException;
 import edu.tcu.cs.hogwartsartifactsonline.wizard.dto.WizardDto;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class WizardService {
@@ -19,28 +19,29 @@ public class WizardService {
         return wizardRepository.findAll();
     }
 
-    public Optional<Wizard> findById(Integer id) {
-        return wizardRepository.findById(id);
+    public Wizard findById(Integer id) {
+        return wizardRepository.findById(id)
+            .orElseThrow(() -> new ObjectNotFoundException("Wizard", id));
     }
 
     public Wizard save(Wizard wizard) {
         return wizardRepository.save(wizard);
     }
 
-    public Optional<Wizard> update(Integer id, WizardDto wizardDto) {
-        return wizardRepository.findById(id).map(existingWizard -> {
-            existingWizard.setName(wizardDto.name());
-
-            return wizardRepository.save(existingWizard);
-        });
+    public Wizard update(Integer id, WizardDto wizardDto) {
+        return wizardRepository.findById(id)
+                .map(existingWizard -> {
+                    existingWizard.setName(wizardDto.name());
+                    return wizardRepository.save(existingWizard);
+                })
+                .orElseThrow(() -> new ObjectNotFoundException("Wizard", id));
     }
 
     public boolean delete(Integer id) {
-        if (wizardRepository.existsById(id)) {
-            wizardRepository.deleteById(id);
-            return true;
-        } else {
-            return false;
-        }
+        Wizard wizard = wizardRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException("Wizard", id));
+        wizard.removeAllArtifacts();
+        wizardRepository.deleteById(id);
+        return true;
     }
 }
