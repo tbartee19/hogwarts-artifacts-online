@@ -1,5 +1,6 @@
 package edu.tcu.cs.hogwartsartifactsonline.wizard;
 
+import edu.tcu.cs.hogwartsartifactsonline.system.exception.ObjectNotFoundException;
 import edu.tcu.cs.hogwartsartifactsonline.wizard.Wizard;
 import edu.tcu.cs.hogwartsartifactsonline.wizard.WizardService;
 import edu.tcu.cs.hogwartsartifactsonline.wizard.dto.WizardDto;
@@ -12,7 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
-import java.util.Optional;
+
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -54,7 +55,7 @@ class WizardControllerTest {
         w1.setId(1);
         w1.setName("Albus Dumbledore");
 
-        when(wizardService.findById(1)).thenReturn(Optional.of(w1));
+        when(wizardService.findById(1)).thenReturn(w1);
 
         mockMvc.perform(get("/api/wizards/1"))
                 .andExpect(status().isOk())
@@ -63,7 +64,8 @@ class WizardControllerTest {
 
     @Test
     void testFindById_NotFound() throws Exception {
-        when(wizardService.findById(4)).thenReturn(Optional.empty());
+        // Simulate the ObjectNotFoundException being thrown
+        when(wizardService.findById(4)).thenThrow(new ObjectNotFoundException("Wizard", 4));
 
         mockMvc.perform(get("/api/wizards/4"))
                 .andExpect(status().isNotFound());
@@ -92,7 +94,7 @@ class WizardControllerTest {
         w1.setId(1);
         w1.setName("Albus Dumbledore - Updated");
 
-        when(wizardService.update(eq(1), any(WizardDto.class))).thenReturn(Optional.of(w1));
+        when(wizardService.update(eq(1), any(WizardDto.class))).thenReturn(w1);
 
         mockMvc.perform(put("/api/wizards/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -105,7 +107,9 @@ class WizardControllerTest {
     void testUpdate_NotFound() throws Exception {
         WizardDto wizardDto = new WizardDto(4, "Unknown Wizard", 0);
 
-        when(wizardService.update(eq(4), any(WizardDto.class))).thenReturn(Optional.empty());
+        // Simulate the ObjectNotFoundException being thrown
+        when(wizardService.update(eq(4), any(WizardDto.class)))
+                .thenThrow(new ObjectNotFoundException("Wizard", 4));
 
         mockMvc.perform(put("/api/wizards/4")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -123,7 +127,8 @@ class WizardControllerTest {
 
     @Test
     void testDelete_NotFound() throws Exception {
-        when(wizardService.delete(4)).thenReturn(false);
+        // Simulate the ObjectNotFoundException being thrown
+        when(wizardService.delete(4)).thenThrow(new ObjectNotFoundException("Wizard", 4));
 
         mockMvc.perform(delete("/api/wizards/4"))
                 .andExpect(status().isNotFound());

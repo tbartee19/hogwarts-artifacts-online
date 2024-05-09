@@ -7,6 +7,9 @@ import jakarta.persistence.ManyToOne;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+
 @Entity
 public class Artifact implements Serializable {
 
@@ -20,6 +23,7 @@ public class Artifact implements Serializable {
     private String imageUrl;
 
     @ManyToOne
+    @JsonBackReference
     private Wizard owner;
 
 
